@@ -25,7 +25,7 @@ Documentation = "https://github.com/lyqgzbl/nonebot-plugin-ipinfo#readme"
 
 [tool.uv.build-backend]
 module-name = "nonebot_plugin_ipinfo"
-module-root = ""
+module-root = "src"
 
 [dependency-groups]
 dev = [
