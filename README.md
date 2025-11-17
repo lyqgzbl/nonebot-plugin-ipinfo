@@ -34,8 +34,10 @@ pip install nonebot-plugin-ipinfo
 
 ## 使用
 命令需要加 [NoneBot 命令前缀](https://nonebot.dev/docs/appendices/config#command-start-和-command-separator) (默认为`/`)  
-命令 `ipinfo` / `ip` 查询 ip 地址的信息
-
+命令 `ipinfo` / `ip` 查询 IP 地址的信息  
+命令 `domaininfo` 查询域名的 WHOIS 信息  
+命令 `getdomain` 查询 IP 地址的托管域名  
+以上命令均支持使用 `-v` 命令选项输出详细的信息  
 
 
 ## 配置项
@@ -64,4 +66,4 @@ pip install nonebot-plugin-ipinfo
 
 - 类型：`bool`
 - 默认值：`False`
-- 说明：verbose 模式是否使用合并转发消息发送
+- 说明：`-v` 模式是否使用合并转发消息发送
