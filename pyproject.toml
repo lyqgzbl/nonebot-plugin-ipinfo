@@ -1,6 +1,6 @@
 [project]
 name = "nonebot-plugin-ipinfo"
-version = "1.0.0"
+version = "1.0.1"
 description = "NoneBot IP 信息查询插件"
 readme = "README.md"
 authors = [
