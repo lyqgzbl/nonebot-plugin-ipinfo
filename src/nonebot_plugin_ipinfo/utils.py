@@ -52,8 +52,7 @@ async def validate_ip(ip: str) -> bool:
 async def get_ip_info_by_ipinfo(ip: str) -> Details | None:
     try:
         handler =  ipinfo.getHandlerLite(access_token)
-        loop = asyncio.get_running_loop()
-        response =  await loop.run_in_executor(None, handler.getDetails, ip)
+        response =  await asyncio.to_thread(handler.getDetails, ip)
     except Exception as e:
         logger.error(f"使用 ipinfo 查询 IP 信息时发生错误: {e}")
         return None
@@ -64,8 +63,7 @@ async def get_ip_info_by_ip2location(ip: str) -> dict | None:
     try:
         configureation = ip2locationio.Configuration(ip2location_api_key)
         ipgeolocation = ip2locationio.IPGeolocation(configureation)
-        loop = asyncio.get_running_loop()
-        response = await loop.run_in_executor(None, ipgeolocation.lookup, ip)
+        response = await asyncio.to_thread(ipgeolocation.lookup, ip)
     except Exception as e:
         logger.error(f"使用 ip2location 查询 IP 信息时发生错误: {e}")
         return
@@ -76,8 +74,7 @@ async def get_domain_information(domain: str) -> dict | None:
     try:
         configuration = ip2locationio.Configuration(ip2location_api_key)
         domainwhois = ip2locationio.DomainWHOIS(configuration)
-        loop = asyncio.get_running_loop()
-        response =  await loop.run_in_executor(None, domainwhois.lookup, domain)
+        response =  await asyncio.to_thread(domainwhois.lookup, domain)
     except Exception as e:
         logger.error(f"使用 ip2location 查询域名信息时发生错误: {e}")
         return
@@ -88,8 +85,7 @@ async def get_hosted_domains(ip: str) -> dict | None:
     try:
         configuration = ip2locationio.Configuration(ip2location_api_key)
         hosteddomains = ip2locationio.HostedDomain(configuration)
-        loop = asyncio.get_running_loop()
-        response = await loop.run_in_executor(None, hosteddomains.lookup, ip)
+        response = await asyncio.to_thread(hosteddomains.lookup, ip)
     except Exception as e:
         logger.error(f"使用 ip2location 查询托管域名时发生错误: {e}")
         return
