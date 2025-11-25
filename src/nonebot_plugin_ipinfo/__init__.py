@@ -50,6 +50,11 @@ ip2location_api_key = plugin_config.ipinfo_ip2location_api_key
 verbose_use_reference = plugin_config.ipinfo_verbose_use_reference
 
 
+ipinfo_is_enable = Rule(lambda: bool(access_token))
+ip2location_is_enable = Rule(lambda: bool(ip2location_api_key))
+is_enable = Rule(lambda: bool(access_token or ip2location_api_key))
+
+
 if use_ip2location and not ip2location_api_key:
         logger.opt(colors=True).warning(
             "<yellow>启用 IP2Location 但缺失必要配置项"
@@ -64,27 +69,22 @@ if  not use_ip2location and not access_token:
 async def send_verbose_message(info: str, title: str):
     bot = get_bots()
     onebot = next((b for b in bot.values() if b.type == "OneBot V11"), None)
-    if onebot:
-        if verbose_use_reference:
-            try:
-                node1 = CustomNode(
-                    content=UniMessage.text(info),
-                    uid="3556416206",
-                    name=title,
-                )
-                await UniMessage.reference(node1).finish()
-            except ActionFailed as e:
-                logger.error(f"发送详细信息时发生错误: {e}")
-                await UniMessage.text(info).finish(reply_to=True)
-        else:
-            await UniMessage.text(info).finish(reply_to=True)
-    else:
+    if not onebot:
         await UniMessage.text(info).finish(reply_to=True)
-
-
-ipinfo_is_enable = Rule(lambda: bool(access_token))
-ip2location_is_enable = Rule(lambda: bool(ip2location_api_key))
-is_enable = Rule(lambda: bool(access_token or ip2location_api_key))
+        return
+    if not verbose_use_reference:
+        await UniMessage.text(info).finish(reply_to=True)
+        return
+    try:
+        node1 = CustomNode(
+            content=UniMessage.text(info),
+            uid="3556416206",
+            name=title,
+        )
+        await UniMessage.reference(node1).finish()
+    except ActionFailed as e:
+        logger.error(f"发送详细信息时发生错误: {e}")
+        await UniMessage.text(info).finish(reply_to=True)
 
 
 domain_info_command = on_alconna(
@@ -225,22 +225,7 @@ async def handle_ipinfo_command(user_input_ip: str):
     is_valid = await validate_ip(user_input_ip)
     if not is_valid:
         await ip_info_commnd.finish("请输入有效的 IP 地址")
-    if use_ip2location:
-        response = await get_ip_info_by_ip2location(user_input_ip)
-        if not response:
-            await ip_info_commnd.finish("查询 IP 信息时发生错误, 请稍后再试")
-        info = (
-            f"IP地址: {response.get('ip', 'N/A')}\n"
-            f"国家/地区: {response.get('country_name', 'N/A')}\n"
-            f"省份/州: {response.get('region_name', 'N/A')}\n"
-            f"城市: {response.get('city_name', 'N/A')}\n"
-            f"纬度: {response.get('latitude', 'N/A')}\n"
-            f"经度: {response.get('longitude', 'N/A')}\n"
-            f"ASN编号: {response.get('asn', 'N/A')}\n"
-            f"组织名称: {response.get('as', 'N/A')}\n"
-        )
-        await UniMessage.text(info).finish(reply_to=True)
-    else:
+    if not use_ip2location:
         response = await get_ip_info_by_ipinfo(user_input_ip)
         if not response:
             await ip_info_commnd.finish("查询 IP 信息时发生错误, 请稍后再试")
@@ -252,3 +237,17 @@ async def handle_ipinfo_command(user_input_ip: str):
             f"大陆: {getattr(response, 'continent', 'N/A')}\n"
         )
         await UniMessage.text(info).finish(reply_to=True)
+    response = await get_ip_info_by_ip2location(user_input_ip)
+    if not response:
+        await ip_info_commnd.finish("查询 IP 信息时发生错误, 请稍后再试")
+    info = (
+        f"IP地址: {response.get('ip', 'N/A')}\n"
+        f"国家/地区: {response.get('country_name', 'N/A')}\n"
+        f"省份/州: {response.get('region_name', 'N/A')}\n"
+        f"城市: {response.get('city_name', 'N/A')}\n"
+        f"纬度: {response.get('latitude', 'N/A')}\n"
+        f"经度: {response.get('longitude', 'N/A')}\n"
+        f"ASN编号: {response.get('asn', 'N/A')}\n"
+        f"组织名称: {response.get('as', 'N/A')}\n"
+    )
+    await UniMessage.text(info).finish(reply_to=True)
